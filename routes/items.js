@@ -5,16 +5,32 @@ const Item = require('../models/item');
 /**
  * @swagger
  * /items:
- *   get:
- *     summary: Retrieve a list of items
+ *   post:
+ *     summary: Create a new item (includes asynchronous behavior)
+ *     description: Simulates processing delay using setTimeout before saving the item to the database.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Item'
  *     responses:
- *       200:
- *         description: A list of items
+ *       201:
+ *         description: Item created successfully after simulated async delay
  */
-router.get('/', async (req, res) => {
-  const items = await Item.find();
-  res.json(items);
+
+router.post('/', async (req, res) => {
+  setTimeout(async () => {
+    try {
+      const item = new Item(req.body);
+      await item.save();
+      res.status(201).json(item);
+    } catch (err) {
+      res.status(400).json({ message: err.message });
+    }
+  }, 1000); 
 });
+
 
 /**
  * @swagger
